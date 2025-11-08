@@ -1,4 +1,4 @@
-import { supabase, convertUserFromDb, convertLeaveRequestFromDb, convertUserToDb, convertLeaveRequestToDb } from './supabase'
+import { supabase, convertUserFromDb, convertLeaveRequestFromDb, convertUserToDb, convertLeaveRequestToDb } from './supabaseClient'
 import type { User, Department, LeaveType, LeaveRequest, Notification, LogEntry } from '@/types'
 
 // Users service
@@ -428,7 +428,30 @@ export const leaveRequestsService = {
 
 // Notifications service
 export const notificationsService = {
-  // Get notifications for user
+  // Get all notifications
+  async getAll(): Promise<Notification[]> {
+    const { data, error } = await supabase
+      .from('notifications')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Error fetching all notifications:', error)
+      throw error
+    }
+
+    return data?.map(notif => ({
+      id: notif.id,
+      userId: notif.user_id,
+      message: notif.message,
+      type: notif.type,
+      isRead: notif.is_read,
+      createdAt: new Date(notif.created_at),
+      leaveRequestId: notif.leave_request_id || undefined
+    })) || []
+  },
+
+  // Get notifications by user
   async getByUser(userId: string): Promise<Notification[]> {
     const { data, error } = await supabase
       .from('notifications')

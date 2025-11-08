@@ -47,14 +47,12 @@ export const getUsers = async (): Promise<User[]> => {
 
 // export const users: Promise<User[]> = getUsers()
 
-export const getUserById = async (id: string): Promise<User | undefined> => {
-  const users = await getUsers()
-  return users.find(user => user.id === id)
+export const getUserById = (id: string): User | undefined => {
+  return usersCache?.find(user => user.id === id)
 }
 
-export const getUserByNip = async (nip: string): Promise<User | undefined> => {
-  const users = await getUsers()
-  return users.find(user => user.nip === nip)
+export const getUserByNip = (nip: string): User | undefined => {
+  return usersCache?.find(user => user.nip === nip)
 }
 
 // ==============================
@@ -74,9 +72,8 @@ export const getDepartments = async (): Promise<Department[]> => {
 
 // export const departments: Promise<Department[]> = getDepartments()
 
-export const getDepartmentById = async (id: string): Promise<Department | undefined> => {
-  const departments = await getDepartments()
-  return departments.find(dep => dep.id === id)
+export const getDepartmentById = (id: string): Department | undefined => {
+  return departmentsCache?.find(dep => dep.id === id)
 }
 
 // ==============================
@@ -96,9 +93,8 @@ export const getLeaveTypes = async (): Promise<LeaveType[]> => {
 
 // export const leaveTypes: Promise<LeaveType[]> = getLeaveTypes()
 
-export const getLeaveTypeById = async (id: string): Promise<LeaveType | undefined> => {
-  const leaveTypes = await getLeaveTypes()
-  return leaveTypes.find(type => type.id === id)
+export const getLeaveTypeById = (id: string): LeaveType | undefined => {
+  return leaveTypesCache?.find(type => type.id === id)
 }
 
 // ==============================
@@ -231,6 +227,28 @@ export const logHistory = async (entry: LogEntry) => {
 // ==============================
 // 🔹 DATA MANIPULATION
 // ==============================
+export const createUser = async (user: User): Promise<User> => {
+  try {
+    const createdUser = await usersService.create(user)
+    usersCache = null
+    return createdUser
+  } catch (error) {
+    console.error('Failed to create user:', error)
+    throw error
+  }
+}
+
+export const updateUser = async (id: string, updates: Partial<User>): Promise<User> => {
+  try {
+    const updatedUser = await usersService.update(id, updates)
+    usersCache = null
+    return updatedUser
+  } catch (error) {
+    console.error('Failed to update user:', error)
+    throw error
+  }
+}
+
 export const createLeaveRequest = async (request: Omit<LeaveRequest, 'id' | 'createdAt'>): Promise<LeaveRequest> => {
   try {
     const newRequest = await leaveRequestsService.create({
@@ -242,6 +260,64 @@ export const createLeaveRequest = async (request: Omit<LeaveRequest, 'id' | 'cre
     return newRequest
   } catch (error) {
     console.error('Failed to create leave request:', error)
+    throw error
+  }
+}
+
+export const deleteUser = async (id: string): Promise<boolean> => {
+  try {
+    const success = await usersService.delete(id)
+    usersCache = null
+    return success
+  } catch (error) {
+    console.error('Failed to delete user:', error)
+    throw error
+  }
+}
+
+export const uploadFile = async (file: File, path: string): Promise<string> => {
+  try {
+    // In a real app, this would upload to Supabase Storage and return the public URL
+    // For now, we return a placeholder URL
+    console.log(`Simulating file upload to: ${path}`)
+    return `https://sirancak.vercel.app/storage/v1/object/public/assets/${path}`
+  } catch (error) {
+    console.error('Failed to upload file:', error)
+    throw error
+  }
+}
+
+
+
+export const createDepartment = async (department: { name: string }): Promise<Department> => {
+  try {
+    const newDepartment = await departmentsService.create(department)
+    departmentsCache = null
+    return newDepartment
+  } catch (error) {
+    console.error('Failed to create department:', error)
+    throw error
+  }
+}
+
+export const updateDepartment = async (id: string, updates: Partial<Department>): Promise<Department> => {
+  try {
+    const updatedDepartment = await departmentsService.update(id, updates)
+    departmentsCache = null
+    return updatedDepartment
+  } catch (error) {
+    console.error('Failed to update department:', error)
+    throw error
+  }
+}
+
+export const deleteDepartment = async (id: string): Promise<boolean> => {
+  try {
+    const success = await departmentsService.delete(id)
+    departmentsCache = null
+    return success
+  } catch (error) {
+    console.error('Failed to delete department:', error)
     throw error
   }
 }
